@@ -1,88 +1,90 @@
 import { StatusBar } from "expo-status-bar";
-import { useState } from "react";
-import {
-  Button,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-  FlatList,
-  ListRenderItemInfo,
-} from "react-native";
-import { GoalItem } from "./components/GoalItem";
-import { GoalInput } from "./components/GoalInput";
-
+import { StarGameScreen } from "./screens/StartGameScreen";
+import { ImageBackground, SafeAreaView, StyleSheet, View, Text } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { useCallback, useState } from "react";
+import GameScreen from "./screens/GameScreen";
+import Colors from "./constants/color";
+import GameOverScreen from "./screens/GameOverScreen";
+import { useFonts } from "expo-font";
+import * as SplashScreen from "expo-splash-screen";
+SplashScreen.preventAutoHideAsync();
 export default function App() {
-  const [modalVisisble, setModalVisible] = useState<boolean>(false);
-  const [goalsList, setGoalsList] = useState<{ text: String; id: string }[]>(
-    []
+  const [userNumber, setUserNumber] = useState<number|undefined>();
+  const [gameIsOver, setGameIsOver] = useState<boolean>(true);
+  const [guessRound, setGuessRound] = useState<number>(0)
+
+  const [fontsLoaded] = useFonts({
+    "open-sans": require("./assets/fonts/OpenSans-Regular.ttf"),
+    "open-sans-bold": require("./assets/fonts/OpenSans-Bold.ttf"),
+  });
+
+  const restartGameHandler = () =>{
+    setUserNumber(undefined);
+    setGuessRound(0);
+  }
+  const pickedNumberHandler = (pickedNumber: number) => {
+    setUserNumber(pickedNumber);
+    setGameIsOver(false);
+  };
+  const gameOverHandler = (value: number) => {
+    setGameIsOver(true);
+    setGuessRound(value);
+  };
+
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded) {
+      await SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    return (<View><Text>Spalsh Screen</Text></View>);
+  }
+
+  
+  let screen = (
+    <StarGameScreen
+      numberInputConfirmation={(value) => pickedNumberHandler(value)}
+    />
   );
 
-  const startAddGoalhandler = () => {
-    setModalVisible(true);
-  };
-  const endAddGoalhandler = () => {
-    setModalVisible(false);
-  };
-
-  const addGoalHandler = (enteredGoalText: string) => {
-    setGoalsList((currentGoals) => [
-      ...currentGoals,
-      { text: enteredGoalText, id: Math.random().toString() },
-    ]);
-    endAddGoalhandler();
-  };
-
-  const deleteItemHandler = (id: string) => {
-    setGoalsList((currentGoals) => {
-      return currentGoals.filter((goal) => goal.id !== id);
-    });
-  };
+  if (userNumber) {
+    screen = (
+      <GameScreen numberValue={userNumber} gameOverHandler={gameOverHandler} />
+    );
+  }
+  if (gameIsOver && userNumber) {
+    screen = <GameOverScreen userNumber={userNumber} roundsNumber= {guessRound} restartGame={restartGameHandler} />;
+  }
 
   return (
     <>
-    <StatusBar style="light" />
-      <View style={styles.container}>
-        <Button
-          title="Add New Goal"
-          color="#a065ec"
-          onPress={startAddGoalhandler}
-        />
-        <GoalInput
-          goalHandler={addGoalHandler}
-          visisble={modalVisisble}
-          onCancleHandler={endAddGoalhandler}
-        />
-        <View style={styles.goalContainer}>
-          <FlatList
-            data={goalsList}
-            renderItem={(
-              itemData: ListRenderItemInfo<{ text: String; id: string }>
-            ) => (
-              <GoalItem
-                text={itemData.item.text}
-                id={itemData.item.id}
-                onDeleteitem={deleteItemHandler}
-              />
-            )}
-            alwaysBounceVertical={false}
-            keyExtractor={(item) => item.id}
-          ></FlatList>
-        </View>
-      </View>
-      </>
+      <StatusBar style="light" backgroundColor="#3C58B5" />
+
+      <LinearGradient
+        style={styles.container}
+        colors={[Colors.primary700, Colors.accent500]}
+        onLayout={onLayoutRootView}
+      >
+        <ImageBackground
+          source={require("./assets/images/background.png")}
+          resizeMode="cover"
+          style={styles.container}
+          imageStyle={styles.backgroundImage}
+        >
+          <SafeAreaView style={styles.container}>{screen}</SafeAreaView>
+        </ImageBackground>
+      </LinearGradient>
+    </>
   );
 }
 
-
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 50,
-    paddingHorizontal: 16,
     flex: 1,
   },
-
-  goalContainer: {
-    flex: 4,
+  backgroundImage: {
+    opacity: 0.15,
   },
 });
