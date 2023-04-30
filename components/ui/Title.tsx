@@ -1,5 +1,5 @@
 import { ReactNode, FC } from 'react';
-import { StyleSheet ,Text} from 'react-native';
+import { Platform, StyleSheet ,Text} from 'react-native';
 import Colors from '../../constants/color';
 
 interface IProps{
@@ -19,9 +19,12 @@ const styles = StyleSheet.create({
        fontFamily:'open-sans-bold',
         color:'white',
         textAlign:'center',
-        borderWidth:2,
+        // borderWidth:Platform.OS==="android" ?2:0, //Way1
+        borderWidth: Platform.select({ios:0, android:2}), //Way2
         borderColor:'white',
-        padding:12
+        padding:12,
+        maxWidth:'80%',
+        width:300
  
      },
 })

@@ -1,4 +1,14 @@
-import { Alert, StyleSheet, TextInput, View, Text } from "react-native";
+import {
+  Alert,
+  StyleSheet,
+  TextInput,
+  View,
+  Text,
+  Dimensions,
+  useWindowDimensions,
+  KeyboardAvoidingView,
+  ScrollView,
+} from "react-native";
 import { PrimaryButton } from "../components/ui/PrimaryButton";
 import { StatusBar } from "expo-status-bar";
 import { FC, useState } from "react";
@@ -32,9 +42,13 @@ export const StarGameScreen: FC<IProps> = ({ numberInputConfirmation }) => {
   const resetButtonHandler = () => {
     setNumberinout("");
   };
+  const {width, height}= useWindowDimensions();
+  const margingTopDistance= height < 380 ? 30 : 100
 
   return (
-    <View style={styles.rootContainer}>
+    <ScrollView style={styles.screen} >
+    <KeyboardAvoidingView   style={styles.screen} behavior="position">
+    <View style={[styles.rootContainer,{marginTop: margingTopDistance}]}>
       <Title>Guess My number</Title>
       <Card>
         <Instruction>Enter a Number</Instruction>
@@ -60,17 +74,20 @@ export const StarGameScreen: FC<IProps> = ({ numberInputConfirmation }) => {
         </View>
       </Card>
     </View>
+    </KeyboardAvoidingView>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  screen:{
+    flex: 1,
+  },
   rootContainer: {
     flex: 1,
-    marginTop: 100,
     alignItems: "center",
   },
 
- 
   numberInput: {
     width: 50,
     height: 50,

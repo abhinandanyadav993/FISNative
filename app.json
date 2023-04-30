@@ -3,7 +3,7 @@
     "name": "FISNative",
     "slug": "FISNative",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "backgroundColor":"#F5F5F5",
